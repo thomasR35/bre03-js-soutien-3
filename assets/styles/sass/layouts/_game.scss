@@ -1,0 +1,77 @@
+#game {
+  display: grid;
+  grid-template-rows: 20vh 80vh;
+  background-color: $blue;
+  color: $yellow;
+
+  & > header {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
+    align-items: center;
+    text-align: center;
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      color:$white;
+    }
+  }
+
+  & > main {
+    display: grid;
+    grid-template-rows: 25vh 55vh;
+
+    section {
+      display: grid;
+
+      &#word {
+
+        ul {
+          display: grid;
+          grid-template-columns: repeat(8, 1fr);
+          column-gap: 1rem;
+          padding: 2rem 3rem;
+
+          li {
+            display: grid;
+            background-color: $yellow;
+            border-radius: 10px;
+            color: $black;
+            font-size: 2rem;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      }
+
+      &#keyboard {
+        ul {
+          display: grid;
+          grid-template-columns: repeat(10, 1fr);
+          column-gap: 1rem;
+          row-gap: 1rem;
+          padding: 2rem 3rem;
+
+          li {
+            border-radius: 10px;
+            display: grid;
+            background-color: $white;
+            color: $black;
+            font-size: 2rem;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+
+            &.disabled {
+              background-color: $gray;
+            }
+          }
+        }
+      }
+    }
+  }
+}
