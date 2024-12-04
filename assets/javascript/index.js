@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  /*Objet de jeu*/
   const game = {
-    word: "",
-    tries: 5,
-    letters: [],
+    word: "" /*Mot à deviner*/,
+    tries: 5 /*Nombre d'essais*/,
+    letters: [] /*Lettres déjà essayées*/,
   };
 
+  /*Fonction qui charge le mot depuis l'API*/
   async function getWord() {
     const response = await fetch(
       "https://random-word-api.vercel.app/api?words=1&length=8"
@@ -13,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return data[0];
   }
 
+  /*Fonction de réappropriation des voyelles*/
   function cleanWord(game) {
     let newWord = game.word;
     const replacements = [
@@ -37,32 +40,41 @@ document.addEventListener("DOMContentLoaded", async function () {
     game.word = newWord;
   }
 
+  /*Fonction de boucle de jeu*/
   async function gameLoop() {
+    /*Charger un nouveau mot depuis l'API*/
     game.word = await getWord();
     console.log(game.word);
 
+    /*Nettoyer le mot (réappropriation des voyelles)*/
     cleanWord(game);
     console.log("Mot nettoyé :", game.word);
 
+    /*Réinitialiser les essais et les lettres essayées*/
     game.tries = 5;
     game.letters = [];
 
+    /*Mettre à jour l'affichage des essais restants*/
     document.querySelector("header h3 span").textContent = game.tries;
 
+    /*Réinitialiser les cases de lettres*/
     const letterBoxes = document.querySelectorAll("#word li");
     letterBoxes.forEach((box) => {
       box.textContent = "";
     });
 
+    /*Réinitialiser les boutons du clavier*/
     const keyboardButtons = document.querySelectorAll("#keyboard li");
     keyboardButtons.forEach((button) => {
       button.classList.remove("disabled");
       button.style.color = "";
     });
 
+    /*Sauvegarder l'état du jeu*/
     saveGameState();
   }
 
+  /*Fonction de coloration des lettres incorrectes*/
   function redWrongLetters() {
     const keyboardButtons = document.querySelectorAll("#keyboard li");
     for (let i = 0; i < game.word.length; i++) {
@@ -76,19 +88,24 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  /*Fonction de sauvegarde du jeu*/
   function saveGameState() {
     localStorage.setItem("gameState", JSON.stringify(game));
   }
 
+  /*Fonction de chargement du jeu*/
   function loadGameState() {
     const gameState = JSON.parse(localStorage.getItem("gameState"));
     if (gameState) {
+      /*Charger l'état du jeu depuis le localStorage*/
       game.word = gameState.word;
       game.tries = gameState.tries;
       game.letters = gameState.letters;
 
+      /*Mettre à jour l'affichage des essais restants*/
       document.querySelector("header h3 span").textContent = game.tries;
 
+      /*Mettre à jour les cases de lettres*/
       const letterBoxes = document.querySelectorAll("#word li");
       letterBoxes.forEach((box, index) => {
         if (game.letters.includes(game.word[index])) {
@@ -96,6 +113,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       });
 
+      /*Mettre à jour les boutons du clavier*/
       const keyboardButtons = document.querySelectorAll("#keyboard li");
       keyboardButtons.forEach((button) => {
         if (game.letters.includes(button.innerText.toLowerCase())) {
@@ -103,14 +121,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       });
     } else {
+      /*Si aucun état de jeu n'est sauvegardé, démarrer une nouvelle partie*/
       gameLoop();
     }
   }
 
+  /*Fonction de gestion des clics sur le clavier*/
   document.getElementById("keyboard").addEventListener("click", (e) => {
     if (e.target.tagName === "LI") {
       const letter = e.target.innerText.toLowerCase();
       if (!game.letters.includes(letter)) {
+        /*Ajouter la lettre aux lettres essayées*/
         game.letters.push(letter);
         e.target.classList.add("disabled");
         console.log(game.letters);
@@ -119,19 +140,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         const letterBoxes = document.querySelectorAll("#word li");
         for (let i = 0; i < game.word.length; i++) {
           if (game.word[i] === letter) {
+            /*Si la lettre est dans le mot, l'afficher*/
             letterBoxes[i].textContent = letter;
             letterFound = true;
           }
         }
 
         if (!letterFound) {
+          /*Si la lettre n'est pas dans le mot, décrémenter les essais*/
           game.tries--;
           document.querySelector("header h3 span").textContent = game.tries;
         }
 
+        /*Sauvegarder l'état du jeu*/
         saveGameState();
 
         if (game.tries === 0) {
+          /*Si tous les essais sont épuisés, demander au joueur de deviner le mot*/
           const userGuess = prompt(
             "Vous avez épuisé vos essais. Devinez le mot : "
           );
@@ -143,8 +168,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             );
             redWrongLetters();
           }
+          /*Redémarrer une nouvelle partie après un délai*/
           setTimeout(gameLoop, 2000);
         } else {
+          /*Vérifier si toutes les lettres du mot ont été trouvées*/
           let allLettersFound = true;
           for (let i = 0; i < letterBoxes.length; i++) {
             if (letterBoxes[i].textContent === "") {
@@ -154,6 +181,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           }
           if (allLettersFound) {
             alert("Bravo, vous avez trouvé le mot !");
+            /*Redémarrer une nouvelle partie après un délai*/
             setTimeout(gameLoop, 2000);
           }
         }
@@ -161,5 +189,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
+  /*Charger l'état du jeu au démarrage*/
   loadGameState();
 });
